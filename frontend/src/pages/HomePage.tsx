@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
       <p className="text-xl text-gray-600 mb-8">
         効率的な単語学習で語彙力を向上させましょう
       </p>
-      
+
       <div className="grid md:grid-cols-3 gap-6 mb-12">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold mb-3">単語管理</h3>
@@ -37,22 +37,22 @@ const HomePage: React.FC = () => {
 
       {user ? (
         <div className="space-x-4">
-          <Link 
-            to="/dashboard" 
+          <Link
+            to="/dashboard"
             className="bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition-colors inline-block"
           >
             ダッシュボードへ
           </Link>
-          <Link 
-            to="/study" 
+          <Link
+            to="/study"
             className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors inline-block"
           >
             学習を始める
           </Link>
         </div>
       ) : (
-        <Link 
-          to="/login" 
+        <Link
+          to="/login"
           className="bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition-colors inline-block"
         >
           今すぐ始める

@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import axios from 'axios'
 import { supabase } from '../lib/supabase'
 
@@ -14,11 +15,11 @@ export const api = axios.create({
 // Add auth token to requests
 api.interceptors.request.use(async (config) => {
   const { data: { session } } = await supabase.auth.getSession()
-  
+
   if (session?.access_token) {
     config.headers.Authorization = `Bearer ${session.access_token}`
   }
-  
+
   return config
 })
 
@@ -29,13 +30,13 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token expired, try to refresh
       const { data: { session } } = await supabase.auth.refreshSession()
-      
+
       if (!session) {
         // Redirect to login if refresh fails
         window.location.href = '/login'
       }
     }
-    
+
     return Promise.reject(error)
   }
 )

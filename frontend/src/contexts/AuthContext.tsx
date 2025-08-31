@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import type React from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { AuthContextType, User } from '../types'
 
@@ -33,7 +34,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
+        // mark unused param as used to satisfy TS noUnusedParameters
+        void _event
         setUser(session?.user ? {
           id: session.user.id,
           email: session.user.email!,

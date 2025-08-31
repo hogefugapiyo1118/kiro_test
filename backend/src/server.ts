@@ -30,7 +30,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
@@ -39,7 +39,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes will be added here
-app.get('/api', (req, res) => {
+app.get('/api', (req: express.Request, res: express.Response) => {
   res.json({ 
     message: 'Vocabulary API Server',
     version: '1.0.0',
@@ -57,7 +57,7 @@ app.get('/api', (req, res) => {
 app.use(errorHandler);
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use('*', (req: express.Request, res: express.Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 

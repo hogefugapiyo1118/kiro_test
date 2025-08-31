@@ -4,11 +4,15 @@ services:
     name: vocabulary-api
     env: node
     plan: free
+    runtime: node
     buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
+      # Ensure devDependencies are installed during build so TypeScript types are available
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY
@@ -22,10 +26,13 @@ services:
   - type: web
     name: vocabulary-frontend
     env: static
-    plan: free
+    # plan: free
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
+      # Ensure devDependencies are installed for build tools (Vite, TS, etc.)
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY

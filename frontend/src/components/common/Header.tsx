@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -22,24 +22,24 @@ const Header: React.FC = () => {
           <Link to="/" className="text-xl font-bold text-primary-600">
             英単語学習アプリ
           </Link>
-          
+
           <nav className="flex items-center space-x-6">
             {user ? (
               <>
-                <Link 
-                  to="/dashboard" 
+                <Link
+                  to="/dashboard"
                   className="text-gray-600 hover:text-primary-600 transition-colors"
                 >
                   ダッシュボード
                 </Link>
-                <Link 
-                  to="/vocabulary" 
+                <Link
+                  to="/vocabulary"
                   className="text-gray-600 hover:text-primary-600 transition-colors"
                 >
                   単語帳
                 </Link>
-                <Link 
-                  to="/study" 
+                <Link
+                  to="/study"
                   className="text-gray-600 hover:text-primary-600 transition-colors"
                 >
                   学習
@@ -52,8 +52,8 @@ const Header: React.FC = () => {
                 </button>
               </>
             ) : (
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors"
               >
                 ログイン

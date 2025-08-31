@@ -1,4 +1,3 @@
-import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import Header from './components/common/Header'
@@ -19,29 +18,29 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route 
-                path="/vocabulary" 
+              <Route
+                path="/vocabulary"
                 element={
                   <ProtectedRoute>
                     <VocabularyPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/study" 
+              <Route
+                path="/study"
                 element={
                   <ProtectedRoute>
                     <StudyPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/dashboard" 
+              <Route
+                path="/dashboard"
                 element={
                   <ProtectedRoute>
                     <DashboardPage />
                   </ProtectedRoute>
-                } 
+                }
               />
             </Routes>
           </main>
