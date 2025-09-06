@@ -104,7 +104,7 @@ export class StudyService {
 
   private async updateVocabularyMastery(userId: string, vocabularyId: string): Promise<void> {
     // Get recent study sessions for this vocabulary (last 10 sessions)
-    const recentSessions = await this.studySessionRepo.findByVocabularyId(vocabularyId, userId);
+    const recentSessions = await this.studySessionRepo.findByVocabularyId(vocabularyId, userId, 10);
     
     if (recentSessions.length < 3) {
       // Not enough data to determine mastery
