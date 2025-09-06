@@ -2,7 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { StudySession } from '../types/index.js';
 
 export class StudySessionRepository {
-  constructor(private supabase: SupabaseClient) {}
+  constructor(private supabase: SupabaseClient) { }
 
   async create(session: Omit<StudySession, 'id' | 'studied_at'>): Promise<StudySession> {
     const { data, error } = await this.supabase
@@ -38,13 +38,19 @@ export class StudySessionRepository {
     return data || [];
   }
 
-  async findByVocabularyId(vocabularyId: string, userId: string): Promise<StudySession[]> {
-    const { data, error } = await this.supabase
+  async findByVocabularyId(vocabularyId: string, userId: string, limit?: number): Promise<StudySession[]> {
+    let query = this.supabase
       .from('study_sessions')
       .select('*')
       .eq('vocabulary_id', vocabularyId)
       .eq('user_id', userId)
       .order('studied_at', { ascending: false });
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       throw new Error(`Failed to fetch study sessions for vocabulary: ${error.message}`);
@@ -104,7 +110,7 @@ export class StudySessionRepository {
     const responseTimes = data
       .filter(session => session.response_time !== null)
       .map(session => session.response_time);
-    
+
     const averageResponseTime = responseTimes.length > 0
       ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
       : 0;

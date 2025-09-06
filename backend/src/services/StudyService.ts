@@ -1,11 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { VocabularyRepository, StudySessionRepository, DailyStatsRepository } from '../repositories/index.js';
 import { StudySessionValidator } from '../validators/index.js';
-import { 
-  StudySession, 
-  StudySessionRequest, 
+import {
+  StudySession,
+  StudySessionRequest,
   VocabularyWithMeanings,
-  DashboardStats 
+  DashboardStats
 } from '../types/index.js';
 
 export class StudyService {
@@ -105,7 +105,7 @@ export class StudyService {
   private async updateVocabularyMastery(userId: string, vocabularyId: string): Promise<void> {
     // Get recent study sessions for this vocabulary (last 10 sessions)
     const recentSessions = await this.studySessionRepo.findByVocabularyId(vocabularyId, userId, 10);
-    
+
     if (recentSessions.length < 3) {
       // Not enough data to determine mastery
       return;
