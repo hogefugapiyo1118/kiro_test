@@ -40,7 +40,7 @@ export class VocabularyValidator {
     } else if (trimmedWord.length > 255) {
       result.addError('english_word', 'English word must be 255 characters or less');
     } else if (!/^[a-zA-Z0-9\s\-\_']+$/.test(trimmedWord)) {
-      result.addError('english_word', 'English word can only contain letters, spaces, hyphens, and apostrophes');
+      result.addError('english_word', 'English word can only contain letters, numbers, spaces, hyphens, underscores, and apostrophes');
     }
 
     return result;
