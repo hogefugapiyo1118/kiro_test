@@ -7,13 +7,13 @@
   - 環境変数設定とSupabaseクライアント接続を実装
   - _要件: 5.1, 6.1_
 
-- [ ] 2. データベーススキーマとモデル実装
-- [ ] 2.1 Supabaseデータベーステーブル作成
+- [x] 2. データベーススキーマとモデル実装
+- [x] 2.1 Supabaseデータベーステーブル作成
   - vocabulary, japanese_meanings, study_sessions, daily_statsテーブルを作成
   - 適切なインデックスとRow Level Security (RLS)ポリシーを設定
   - _要件: 1.1, 1.2_
 
-- [ ] 2.2 TypeScript型定義とデータモデル実装
+- [x] 2.2 TypeScript型定義とデータモデル実装
   - Vocabulary, JapaneseMeaning, StudySession, DailyStats インターフェースを定義
   - データベース操作用のリポジトリクラスを実装
   - バリデーション関数を作成
