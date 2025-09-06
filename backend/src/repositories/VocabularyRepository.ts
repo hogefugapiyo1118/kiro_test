@@ -43,45 +43,18 @@ export class VocabularyRepository {
   }
 
   async create(vocabulary: Omit<Vocabulary, 'id' | 'created_at' | 'updated_at'>, meanings: Omit<JapaneseMeaning, 'id' | 'vocabulary_id' | 'created_at'>[]): Promise<VocabularyWithMeanings> {
-    // Start transaction by creating vocabulary first
-    const { data: vocabData, error: vocabError } = await this.supabase
-      .from('vocabulary')
-      .insert(vocabulary)
-      .select()
-      .single();
+    // Use a transaction via a Postgres function to ensure atomicity
+    const { data, error } = await this.supabase.rpc('insert_vocabulary_with_meanings', {
+      vocabulary_input: vocabulary,
+      meanings_input: meanings
+    });
 
-    if (vocabError) {
-      throw new Error(`Failed to create vocabulary: ${vocabError.message}`);
+    if (error) {
+      throw new Error(`Failed to create vocabulary and meanings: ${error.message}`);
     }
 
-    // Create meanings
-    if (meanings.length > 0) {
-      const meaningsWithVocabId = meanings.map(meaning => ({
-        ...meaning,
-        vocabulary_id: vocabData.id
-      }));
-
-      const { data: meaningsData, error: meaningsError } = await this.supabase
-        .from('japanese_meanings')
-        .insert(meaningsWithVocabId)
-        .select();
-
-      if (meaningsError) {
-        // Rollback vocabulary creation
-        await this.supabase.from('vocabulary').delete().eq('id', vocabData.id);
-        throw new Error(`Failed to create meanings: ${meaningsError.message}`);
-      }
-
-      return {
-        ...vocabData,
-        japanese_meanings: meaningsData
-      };
-    }
-
-    return {
-      ...vocabData,
-      japanese_meanings: []
-    };
+    // The function should return the vocabulary and its meanings
+    return data as VocabularyWithMeanings;
   }
 
   async update(id: string, userId: string, vocabulary: Partial<Omit<Vocabulary, 'id' | 'user_id' | 'created_at' | 'updated_at'>>, meanings?: Omit<JapaneseMeaning, 'id' | 'vocabulary_id' | 'created_at'>[]): Promise<VocabularyWithMeanings> {
