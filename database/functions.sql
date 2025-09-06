@@ -82,7 +82,7 @@ BEGIN
         (SELECT COUNT(DISTINCT study_date)::INTEGER 
          FROM daily_stats 
          WHERE user_id = p_user_id 
-         AND study_date >= CURRENT_DATE - INTERVAL '1 day' * p_days
+         AND study_date >= CURRENT_DATE - p_days * INTERVAL '1 day'
          AND words_studied > 0),
         -- 総学習単語数
         (SELECT COALESCE(SUM(words_studied), 0)::INTEGER FROM daily_stats WHERE user_id = p_user_id),
