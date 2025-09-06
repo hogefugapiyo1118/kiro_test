@@ -129,7 +129,7 @@ export class VocabularyRepository {
     }
   }
 
-  async search(userId: string, query: string, masteryLevel?: number): Promise<VocabularyWithMeanings[]> {
+  async search(userId: string, query: string, masteryLevel?: number, difficultyLevel?: number, sortBy: string = 'created_at', sortOrder: string = 'desc'): Promise<VocabularyWithMeanings[]> {
     // ベースのクエリビルダー（select とユーザー/熟練度のフィルタまで）
     const baseSelect = () => {
       let qb = this.supabase
@@ -143,12 +143,17 @@ export class VocabularyRepository {
       if (masteryLevel !== undefined) {
         qb = qb.eq('mastery_level', masteryLevel);
       }
+
+      if (difficultyLevel !== undefined) {
+        qb = qb.eq('difficulty_level', difficultyLevel);
+      }
+
       return qb;
     };
 
     // クエリ未指定時はそのまま返す
     if (!query) {
-      const { data, error } = await baseSelect().order('created_at', { ascending: false });
+      const { data, error } = await baseSelect().order(sortBy, { ascending: sortOrder === 'asc' });
       if (error) {
         throw new Error(`Failed to search vocabulary: ${error.message}`);
       }
@@ -161,11 +166,16 @@ export class VocabularyRepository {
 
     // 2 クエリ（english_word / japanese_meanings.meaning）で OR 条件を再現し、結果をマージ
     const englishPromise = baseSelect().ilike('english_word', pattern);
-    // 日本語意味から vocabulary_id を取得
-    const meaningIdsPromise = this.supabase
+    
+    // 日本語意味から vocabulary_id を取得（フィルタリング条件も適用）
+    let meaningIdsQuery = this.supabase
       .from('japanese_meanings')
       .select('vocabulary_id')
       .ilike('meaning', pattern);
+
+    // 日本語意味検索でも vocabulary テーブルの条件を適用するため、
+    // vocabulary_id を取得してから vocabulary テーブルでフィルタリング
+    const meaningIdsPromise = meaningIdsQuery;
 
     const [englishRes, meaningIdsRes] = await Promise.all([englishPromise, meaningIdsPromise]);
 
@@ -196,8 +206,37 @@ export class VocabularyRepository {
     }
     const unique = Array.from(uniqueMap.values());
 
-    // created_at 降順でソート（サーバー側 order に依存しないようクライアントで統一）
-    unique.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    // ソート処理
+    unique.sort((a: any, b: any) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'english_word':
+          aValue = a.english_word.toLowerCase();
+          bValue = b.english_word.toLowerCase();
+          break;
+        case 'mastery_level':
+          aValue = a.mastery_level;
+          bValue = b.mastery_level;
+          break;
+        case 'difficulty_level':
+          aValue = a.difficulty_level;
+          bValue = b.difficulty_level;
+          break;
+        case 'created_at':
+        default:
+          aValue = new Date(a.created_at).getTime();
+          bValue = new Date(b.created_at).getTime();
+          break;
+      }
+
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
     return unique;
   }
 

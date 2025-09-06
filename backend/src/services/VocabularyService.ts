@@ -86,7 +86,14 @@ export class VocabularyService {
   }
 
   async searchVocabulary(userId: string, params: VocabularySearchParams): Promise<VocabularyWithMeanings[]> {
-    return this.vocabularyRepo.search(userId, params.query || '', params.mastery_level);
+    return this.vocabularyRepo.search(
+      userId, 
+      params.query || '', 
+      params.mastery_level,
+      params.difficulty_level,
+      params.sort_by || 'created_at',
+      params.sort_order || 'desc'
+    );
   }
 
   async getVocabularyForStudy(userId: string, limit: number = 10): Promise<VocabularyWithMeanings[]> {
