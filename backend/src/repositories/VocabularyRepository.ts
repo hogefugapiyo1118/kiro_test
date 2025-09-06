@@ -54,7 +54,10 @@ export class VocabularyRepository {
     }
 
     // The function should return the vocabulary and its meanings
-    return data as VocabularyWithMeanings;
+    if (!data || data.length === 0) {
+      throw new Error('No vocabulary returned from insert_vocabulary_with_meanings');
+    }
+    return data[0] as VocabularyWithMeanings;
   }
 
   async update(id: string, userId: string, vocabulary: Partial<Omit<Vocabulary, 'id' | 'user_id' | 'created_at' | 'updated_at'>>, meanings?: Omit<JapaneseMeaning, 'id' | 'vocabulary_id' | 'created_at'>[]): Promise<VocabularyWithMeanings> {
