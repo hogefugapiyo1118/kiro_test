@@ -1,9 +1,10 @@
 import type React from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { api } from '../services/api'
 import type { AuthContextType, User } from '../types'
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
@@ -20,6 +21,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Get initial session
@@ -49,33 +51,131 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => subscription.unsubscribe()
   }, [])
 
+  const clearError = () => setError(null)
+
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) throw error
+    try {
+      setError(null)
+      setLoading(true)
+      
+      const response = await api.post('/auth/login', {
+        email,
+        password,
+      })
+
+      if (response.data.session) {
+        // Set the session in Supabase client for consistency
+        await supabase.auth.setSession({
+          access_token: response.data.session.access_token,
+          refresh_token: response.data.session.refresh_token,
+        })
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Login failed'
+      setError(errorMessage)
+      throw new Error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    if (error) throw error
+  const signUp = async (email: string, password: string, confirmPassword: string) => {
+    try {
+      setError(null)
+      setLoading(true)
+      
+      const response = await api.post('/auth/register', {
+        email,
+        password,
+        confirmPassword,
+      })
+
+      if (response.data.session) {
+        // Set the session in Supabase client for consistency
+        await supabase.auth.setSession({
+          access_token: response.data.session.access_token,
+          refresh_token: response.data.session.refresh_token,
+        })
+      }
+
+      return response.data
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Registration failed'
+      setError(errorMessage)
+      throw new Error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    try {
+      setError(null)
+      setLoading(true)
+      
+      // Call our backend logout endpoint
+      await api.post('/auth/logout')
+      
+      // Also sign out from Supabase client
+      await supabase.auth.signOut()
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Logout failed'
+      setError(errorMessage)
+      throw new Error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetPassword = async (email: string) => {
+    try {
+      setError(null)
+      
+      const response = await api.post('/auth/reset-password', {
+        email,
+      })
+
+      return response.data
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Password reset failed'
+      setError(errorMessage)
+      throw new Error(errorMessage)
+    }
+  }
+
+  const refreshToken = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.refresh_token) {
+        const response = await api.post('/auth/refresh', {
+          refresh_token: session.refresh_token,
+        })
+
+        if (response.data.session) {
+          await supabase.auth.setSession({
+            access_token: response.data.session.access_token,
+            refresh_token: response.data.session.refresh_token,
+          })
+        }
+      }
+    } catch (err: any) {
+      console.error('Token refresh failed:', err)
+      // If refresh fails, sign out the user
+      await signOut()
+    }
   }
 
   const value: AuthContextType = {
     user,
     loading,
+    error,
     signIn,
     signUp,
     signOut,
+    resetPassword,
+    refreshToken,
+    clearError,
   }
 
   return (
