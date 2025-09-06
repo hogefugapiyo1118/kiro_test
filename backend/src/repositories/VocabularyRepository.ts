@@ -2,7 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Vocabulary, JapaneseMeaning, VocabularyWithMeanings } from '../types/index.js';
 
 export class VocabularyRepository {
-  constructor(private supabase: SupabaseClient) {}
+  constructor(private supabase: SupabaseClient) { }
 
   async findByUserId(userId: string): Promise<VocabularyWithMeanings[]> {
     const { data, error } = await this.supabase
@@ -127,29 +127,75 @@ export class VocabularyRepository {
   }
 
   async search(userId: string, query: string, masteryLevel?: number): Promise<VocabularyWithMeanings[]> {
-    let queryBuilder = this.supabase
-      .from('vocabulary')
-      .select(`
-        *,
-        japanese_meanings (*)
-      `)
-      .eq('user_id', userId);
+    // ベースのクエリビルダー（select とユーザー/熟練度のフィルタまで）
+    const baseSelect = () => {
+      let qb = this.supabase
+        .from('vocabulary')
+        .select(`
+          *,
+          japanese_meanings (*)
+        `)
+        .eq('user_id', userId);
 
-    if (masteryLevel !== undefined) {
-      queryBuilder = queryBuilder.eq('mastery_level', masteryLevel);
+      if (masteryLevel !== undefined) {
+        qb = qb.eq('mastery_level', masteryLevel);
+      }
+      return qb;
+    };
+
+    // クエリ未指定時はそのまま返す
+    if (!query) {
+      const { data, error } = await baseSelect().order('created_at', { ascending: false });
+      if (error) {
+        throw new Error(`Failed to search vocabulary: ${error.message}`);
+      }
+      return data || [];
     }
 
-    if (query) {
-      queryBuilder = queryBuilder.or(`english_word.ilike.%${query}%,japanese_meanings.meaning.ilike.%${query}%`);
+    // LIKE 用のワイルドカードをエスケープし、部分一致にする
+    const escapeForILike = (input: string) => input.replace(/[\\%_]/g, (m) => `\\${m}`);
+    const pattern = `%${escapeForILike(query)}%`;
+
+    // 2 クエリ（english_word / japanese_meanings.meaning）で OR 条件を再現し、結果をマージ
+    const englishPromise = baseSelect().ilike('english_word', pattern);
+    // 日本語意味から vocabulary_id を取得
+    const meaningIdsPromise = this.supabase
+      .from('japanese_meanings')
+      .select('vocabulary_id')
+      .ilike('meaning', pattern);
+
+    const [englishRes, meaningIdsRes] = await Promise.all([englishPromise, meaningIdsPromise]);
+
+    if (englishRes.error) {
+      throw new Error(`Failed to search vocabulary (english_word): ${englishRes.error.message}`);
+    }
+    if (meaningIdsRes.error) {
+      throw new Error(`Failed to search vocabulary (japanese_meanings ids): ${meaningIdsRes.error.message}`);
     }
 
-    const { data, error } = await queryBuilder.order('created_at', { ascending: false });
-
-    if (error) {
-      throw new Error(`Failed to search vocabulary: ${error.message}`);
+    const vocabIdSet = new Set<string>((meaningIdsRes.data || []).map((r: any) => r.vocabulary_id));
+    let meaningSideData: VocabularyWithMeanings[] = [];
+    if (vocabIdSet.size > 0) {
+      const { data: vocabByIds, error: vocabByIdsError } = await baseSelect().in('id', Array.from(vocabIdSet));
+      if (vocabByIdsError) {
+        throw new Error(`Failed to search vocabulary (by meaning): ${vocabByIdsError.message}`);
+      }
+      meaningSideData = (vocabByIds || []) as unknown as VocabularyWithMeanings[];
     }
 
-    return data || [];
+    const combined = [...(englishRes.data || []), ...meaningSideData];
+    // id で重複排除
+    const uniqueMap = new Map<string, VocabularyWithMeanings>();
+    for (const item of combined) {
+      if (!uniqueMap.has((item as any).id)) {
+        uniqueMap.set((item as any).id, item as VocabularyWithMeanings);
+      }
+    }
+    const unique = Array.from(uniqueMap.values());
+
+    // created_at 降順でソート（サーバー側 order に依存しないようクライアントで統一）
+    unique.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return unique;
   }
 
   async getRandomForStudy(userId: string, limit: number = 10): Promise<VocabularyWithMeanings[]> {
