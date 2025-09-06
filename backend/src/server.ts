@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
+import authRoutes from './routes/auth';
 
 dotenv.config();
 
@@ -38,7 +39,9 @@ app.get('/health', (req: express.Request, res: express.Response) => {
   });
 });
 
-// API routes will be added here
+// API routes
+app.use('/api/auth', authRoutes);
+
 app.get('/api', (req: express.Request, res: express.Response) => {
   res.json({ 
     message: 'Vocabulary API Server',

@@ -27,14 +27,26 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Token expired, try to refresh
-      const { data: { session } } = await supabase.auth.refreshSession()
+    const originalRequest = error.config
 
-      if (!session) {
-        // Redirect to login if refresh fails
-        window.location.href = '/login'
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+
+      try {
+        // Try to refresh the token
+        const { data: { session } } = await supabase.auth.refreshSession()
+
+        if (session?.access_token) {
+          // Update the authorization header and retry the request
+          originalRequest.headers.Authorization = `Bearer ${session.access_token}`
+          return api(originalRequest)
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError)
       }
+
+      // If refresh fails, redirect to login
+      window.location.href = '/login'
     }
 
     return Promise.reject(error)
