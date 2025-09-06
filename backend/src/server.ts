@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
+import vocabularyRoutes from './routes/vocabulary';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.get('/health', (req: express.Request, res: express.Response) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/vocabulary', vocabularyRoutes);
 
 app.get('/api', (req: express.Request, res: express.Response) => {
   res.json({ 
