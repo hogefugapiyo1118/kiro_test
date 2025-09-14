@@ -1,0 +1,70 @@
+### REST Client Example - 自動トークン取得版
+@baseUrl = http://localhost:3001/api
+
+### 1. Login (token fetch)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "your-password"
+}
+
+### 2. Vocabulary list (uses extracted token)
+GET {{baseUrl}}/vocabulary?limit=20&offset=0&sort_by=created_at&sort_order=desc
+Authorization: Bearer {{login.response.body.$.token}}
+Accept: application/json
+
+### 3. Vocabulary create
+# @name createVocab
+POST {{baseUrl}}/vocabulary
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "english_word": "example",
+  "example_sentence": "This is an example sentence.",
+  "difficulty_level": 2,
+  "japanese_meanings": [
+    { "meaning": "例", "part_of_speech": "noun", "usage_note": "" }
+  ]
+}
+
+### 4. Vocabulary get (set @vocabId manually or use create response)
+#  create のレスポンスを開き data.id をコピーして下記を更新
+@vocabId = REPLACE_WITH_ID
+GET {{baseUrl}}/vocabulary/{{vocabId}}
+Authorization: Bearer {{login.response.body.$.token}}
+Accept: application/json
+
+### 5. Vocabulary update
+PUT {{baseUrl}}/vocabulary/{{vocabId}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "example_sentence": "Updated sentence.",
+  "mastery_level": 1,
+  "japanese_meanings": [
+    { "meaning": "更新例", "part_of_speech": "noun", "usage_note": "" }
+  ]
+}
+
+### 6. Vocabulary delete
+DELETE {{baseUrl}}/vocabulary/{{vocabId}}
+Authorization: Bearer {{login.response.body.$.token}}
+
+### 7. Study session start
+GET {{baseUrl}}/study/session
+Authorization: Bearer {{login.response.body.$.token}}
+
+### 8. Study result
+POST {{baseUrl}}/study/result
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "vocabulary_id": "REPLACE_WITH_ID",
+  "result": "correct"
+}

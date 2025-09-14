@@ -8,7 +8,14 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "api:login": "bash ./scripts/dev-api.sh login",
+    "api:vocab": "bash ./scripts/dev-api.sh vocab:list",
+    "api:vocab:q": "bash ./scripts/dev-api.sh vocab:list $QUERY",
+    "api:vocab:create": "bash ./scripts/dev-api.sh vocab:create",
+    "api:vocab:get": "bash ./scripts/dev-api.sh vocab:get $ID",
+    "api:vocab:update": "bash ./scripts/dev-api.sh vocab:update $ID",
+    "api:vocab:delete": "bash ./scripts/dev-api.sh vocab:delete $ID"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0",

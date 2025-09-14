@@ -1,3 +1,3 @@
-export { VocabularyRepository } from './VocabularyRepository.js';
-export { StudySessionRepository } from './StudySessionRepository.js';
-export { DailyStatsRepository } from './DailyStatsRepository.js';
+export { VocabularyRepository } from './VocabularyRepository';
+export { StudySessionRepository } from './StudySessionRepository';
+export { DailyStatsRepository } from './DailyStatsRepository';

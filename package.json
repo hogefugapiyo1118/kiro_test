@@ -17,7 +17,8 @@
     "verify": "node verify-setup.js"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "supabase": "^2.40.7"
   },
   "workspaces": [
     "backend",
@@ -26,5 +27,8 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "vite": "^7.1.5"
   }
 }
