@@ -5,4 +5,4 @@ export {
   JapaneseMeaningValidator,
   StudySessionValidator,
   DailyStatsValidator
-} from './vocabularyValidators.js';
+} from './vocabularyValidators';

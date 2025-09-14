@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { VocabularyRepository, StudySessionRepository, DailyStatsRepository } from '../repositories/index.js';
-import { VocabularyValidator, JapaneseMeaningValidator, ValidationResult } from '../validators/index.js';
+import { VocabularyRepository, StudySessionRepository, DailyStatsRepository } from '../repositories/index';
+import { VocabularyValidator, JapaneseMeaningValidator, ValidationResult } from '../validators/index';
 import { 
   Vocabulary, 
   VocabularyWithMeanings, 

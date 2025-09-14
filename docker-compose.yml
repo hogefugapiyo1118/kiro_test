@@ -1,42 +1,25 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  database:
-    image: postgres:15-alpine
-    container_name: vocabulary-db
-    environment:
-      POSTGRES_DB: vocabulary_db
-      POSTGRES_USER: vocabulary_user
-      POSTGRES_PASSWORD: vocabulary_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    networks:
-      - vocabulary-network
-
-  # Backend API
+  # Backend API (外部Supabaseプロジェクト利用)
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: vocabulary-backend
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: postgresql://vocabulary_user:vocabulary_password@database:5432/vocabulary_db
+      # 以下はデプロイ先の環境（.env / CI secret）で上書き
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     ports:
       - "3001:3001"
     volumes:
-      - ./backend:/app
-      - /app/node_modules
-    depends_on:
-      - database
-    networks:
-      - vocabulary-network
-    command: npm run dev
+      - ./backend:/app:ro
+    command: npm run start
 
   # Frontend React App
   frontend:
@@ -45,22 +28,16 @@ services:
       dockerfile: Dockerfile
     container_name: vocabulary-frontend
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       VITE_API_URL: http://localhost:3001
+      VITE_SUPABASE_URL: ${SUPABASE_URL}
+      VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app:ro
     depends_on:
       - backend
-    networks:
-      - vocabulary-network
-    command: npm run dev
+    command: npm run preview
 
-volumes:
-  postgres_data:
-
-networks:
-  vocabulary-network:
-    driver: bridge
+networks: {}

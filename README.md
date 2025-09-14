@@ -18,79 +18,6 @@
 ### ホスティング
 - Render (Web Service + Static Site)
 
-## セットアップ手順
-
-### 1. Supabaseプロジェクト作成
-
-1. [Supabase](https://supabase.com)でアカウント作成
-2. 新しいプロジェクトを作成
-3. プロジェクトURL、anon key、service role keyを取得
-
-### 2. データベーススキーマ設定
-
-1. Supabaseダッシュボードの「SQL Editor」を開く
-2. `database/schema.sql`の内容をコピー&ペースト
-3. 実行してテーブルとRLSポリシーを作成
-
-### 3. 環境変数設定
-
-#### バックエンド
-```bash
-cd backend
-cp .env.example .env
-```
-
-`.env`ファイルを編集:
-```
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-PORT=3001
-NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
-```
-
-#### フロントエンド
-```bash
-cd frontend
-cp .env.example .env
-```
-
-`.env`ファイルを編集:
-```
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_API_URL=http://localhost:3001/api
-```
-
-### 4. 依存関係インストール
-
-#### バックエンド
-```bash
-cd backend
-npm install
-```
-
-#### フロントエンド
-```bash
-cd frontend
-npm install
-```
-
-### 5. 開発サーバー起動
-
-#### バックエンド
-```bash
-cd backend
-npm run dev
-```
-
-#### フロントエンド
-```bash
-cd frontend
-npm run dev
-```
-
 ## 利用可能なスクリプト
 
 ### バックエンド
@@ -142,9 +69,9 @@ npm run dev
 ## 開発状況
 
 - [x] プロジェクト初期設定とSupabase環境構築
-- [ ] データベーススキーマとモデル実装
-- [ ] 認証システム実装
-- [ ] 単語管理API実装
+- [x] データベーススキーマとモデル実装
+- [x] 認証システム実装
+- [x] 単語管理API実装
 - [ ] フロントエンド単語管理UI実装
 - [ ] フラッシュカード学習機能実装
 - [ ] ダッシュボード・統計機能実装
@@ -157,3 +84,150 @@ npm run dev
 ## ライセンス
 
 MIT License
+
+## 初期環境構築 (一度だけ実施)
+
+WSL2 Ubuntu 上にツールを導入し、Supabase プロジェクト・ローカル開発の土台を作ります。
+
+### 1. 前提条件 (WSL2 Ubuntu)
+| 項目 | 内容 |
+|------|------|
+| Windows 10/11 | WSL2 有効化済み (Ubuntu ディストリ) |
+| Docker Desktop | WSL2 統合を有効化 (Settings > Resources > WSL integration) |
+| Node.js (WSL内) | v18+ 推奨 |
+
+確認コマンド:
+```bash
+node -v
+docker compose version
+wsl.exe -l -v   # PowerShell から (状態確認)
+```
+
+### 2. Supabase CLI インストール
+```bash
+npm install supabase --save-dev
+```
+
+### 3. Supabase 初期化 & 初回起動
+```bash
+npx supabase init   # 初回のみ
+npx supabase start  # Auth / REST / Realtime / Storage / Studio 起動
+```
+出力される `API URL`, `anon key`, `service_role key` を控えて `.env` に反映します。
+
+### 4. 環境変数ファイル作成
+`backend/.env`:
+```
+SUPABASE_URL=http://localhost:54321
+SUPABASE_ANON_KEY=your-local-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-local-service-role-key
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+```
+`frontend/.env`:
+```
+VITE_SUPABASE_URL=http://localhost:54321
+VITE_SUPABASE_ANON_KEY=your-local-anon-key
+VITE_API_URL=http://localhost:3001/api
+```
+
+### 5. 依存関係インストール
+```bash
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+### 6. スキーマ適用 (初期)
+最初は `database/schema.sql` を Studio (http://localhost:54323) の SQL Editor で実行。
+差分管理導入時:
+```bash
+npx supabase db diff -f init
+npx supabase db push
+```
+
+### 7. ユーザ作成
+Studio (http://localhost:54323) の Authentication > Users > Add user で新規ユーザの作成
+
+---
+
+## 開発環境での実行 (日常作業)
+
+ここでは初期構築済みであることを前提に日常的な操作をまとめます。
+
+### A. 起動 / 停止
+```bash
+# Supabase (別ターミナル)
+npx supabase start
+
+# アプリ (backend + frontend)
+docker compose -f docker-compose.dev.yml up --build
+
+# バックグラウンド化
+docker compose -f docker-compose.dev.yml up -d
+
+# 停止
+docker compose -f docker-compose.dev.yml down
+npx supabase stop
+```
+
+### B. 状態確認
+```bash
+# Supabase
+npx supabase status
+# アプリ (backend + frontend)
+docker compose ps
+```
+
+### C. 動作確認
+```bash
+# Supabase (postgres/CLI)
+psql -h localhost -p 54322 -U postgres -d postgres # PW:postgres
+# Supabase Studio (GUI)
+http://localhost:54323
+```
+
+### D. マイグレーション運用
+```bash
+# 変更から差分作成
+npx supabase db diff -f feature_xyz
+
+# 適用
+npx supabase db push
+```
+
+### E. データリセット (破壊的)
+```bash
+npx supabase db reset
+```
+再適用後に必要ならサンプル投入スクリプトを実行 (今後 `npm run seed` 予定)。
+
+### F. Edge Functions
+```bash
+npx supabase functions new hello
+npx supabase functions serve hello
+```
+
+### G. 手動(非Docker) デバッグ起動
+```bash
+npx supabase start
+cd backend && npm run dev
+cd frontend && npm run dev
+```
+
+### H. トラブルシュート (WSL)
+| 症状 | 対処 |
+|------|------|
+| ポート競合 | `npx supabase stop` 後 `docker ps -a` で残存確認・削除 |
+| Studio 503 | `npx supabase status` でコンテナ稼働確認、ポート 54323 の競合調査 |
+| 401 Unauthorized | `.env` が最新キーか再確認、Supabase 再起動 |
+| Migration 未反映 | `supabase/migrations` のファイル名・順序を確認後 `db push` |
+| Realtime 不着 | ブラウザ DevTools WS エラーログと `supabase start` のログを確認 |
+
+### I. 本番との差異 (再掲)
+| 項目 | ローカル(WSL) | 本番(Render + Supabase) |
+|------|---------------|-------------------------|
+| URL | http://localhost:54321 | https://<project>.supabase.co |
+| キー | CLI 自動生成 | Supabase ダッシュボードから取得 |
+| ログ | CLI / Docker | Supabase & Render |
+| Secrets 管理 | .env ローカル | Render ダッシュボード + Supabase Settings |

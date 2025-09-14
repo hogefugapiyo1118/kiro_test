@@ -1,30 +1,47 @@
 version: '3.8'
 
-services:
-  database:
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: vocabulary_db_dev
-      POSTGRES_USER: dev_user
-      POSTGRES_PASSWORD: dev_password
+# 開発用 (Supabase CLI 利用前提):
+# 1. 別ターミナルで `supabase start` を実行しローカルSupabase環境を起動
+# 2. 生成された .env / 出力 (デフォルト http://localhost:54321) の anon / service_role キーを下記環境変数に設定
+# 3. この compose はアプリ(backend / frontend) のみ起動
 
+services:
   backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://dev_user:dev_password@database:5432/vocabulary_db_dev
-      DEBUG: "vocabulary:*"
+      PORT: 3001
+      # Supabase CLI のデフォルト: API_URL は http://localhost:54321
+      SUPABASE_URL: http://host.docker.internal:54321
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-dev-anon-key}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-dev-service-role-key}
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "3001:3001"
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
+    command: npm run dev
 
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: development
       VITE_API_URL: http://localhost:3001
+      VITE_SUPABASE_URL: http://localhost:54321
+      VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-dev-anon-key}
+    ports:
+      - "3000:3000"
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+    command: npm run dev
 
 volumes:
   backend_node_modules:

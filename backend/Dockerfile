@@ -2,17 +2,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# 依存関係のみ先にコピー (キャッシュ最適化)
+COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci
+# 開発用途: lock が不整合な場合でも起動を優先したいので npm ci ではなく npm install
+# 本番イメージを別で作る場合は multi-stage で npm ci を使う
+RUN npm install --no-audit --no-fund
 
-# Copy source code
+# 残りのソースをコピー
 COPY . .
 
-# Expose port
 EXPOSE 3001
 
-# Start development server
+# デフォルトは開発サーバ (docker-compose で上書き可)
 CMD ["npm", "run", "dev"]
