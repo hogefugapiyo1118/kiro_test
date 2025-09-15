@@ -83,9 +83,9 @@ const generalLimiter = createRateLimiter(
 
 // Strict rate limiting for authentication endpoints
 const authLimiter = createRateLimiter(
-  15 * 60 * 1000, // 15 minutes
+  5 * 60 * 1000, // 15 minutes
   5, // 5 attempts per window
-  'ログイン試行回数が多すぎます。15分後に再度お試しください'
+  'ログイン試行回数が多すぎます。5分後に再度お試しください'
 );
 
 // Apply rate limiting
