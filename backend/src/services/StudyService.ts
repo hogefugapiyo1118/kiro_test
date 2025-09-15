@@ -1,12 +1,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { VocabularyRepository, StudySessionRepository, DailyStatsRepository } from '../repositories/index.js';
-import { StudySessionValidator } from '../validators/index.js';
+import { VocabularyRepository, StudySessionRepository, DailyStatsRepository } from '../repositories/index';
+import { StudySessionValidator } from '../validators/index';
 import {
   StudySession,
   StudySessionRequest,
   VocabularyWithMeanings,
   DashboardStats
-} from '../types/index.js';
+} from '../types/index';
 
 export class StudyService {
   private vocabularyRepo: VocabularyRepository;

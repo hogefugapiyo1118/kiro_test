@@ -1,4 +1,4 @@
-import { Vocabulary, JapaneseMeaning, StudySession, DailyStats } from '../types/index.js';
+import { Vocabulary, JapaneseMeaning, StudySession, DailyStats } from '../types/index';
 
 export interface ValidationError {
   field: string;
