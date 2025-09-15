@@ -71,8 +71,6 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
     // Validate English word
     if (!formData.english_word.trim()) {
       newErrors.english_word = '英単語は必須です'
-    } else if (formData.english_word.trim().length < 1) {
-      newErrors.english_word = '英単語を入力してください'
     }
 
     // Validate Japanese meanings
