@@ -20,7 +20,9 @@ services:
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: FRONTEND_URL
-        value: https://vocabulary-frontend.onrender.com
+        value: https://dummy-frontend.example.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://dummy-frontend.example.com,https://another-dummy.example.com
 
   # Frontend Static Site
   - type: web
@@ -38,4 +40,4 @@ services:
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
       - key: VITE_API_URL
-        value: https://vocabulary-api.onrender.com/api
+        value: https://dummy-vocabulary-api.example.com/api
