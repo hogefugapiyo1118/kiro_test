@@ -45,10 +45,10 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Search Query */}
-        <div>
+    <div className="bg-white p-4 xl:p-6 rounded-lg shadow-md mb-4 xl:mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 xl:gap-6">
+        {/* Search Query - Takes more space on large screens */}
+        <div className="sm:col-span-2 xl:col-span-2">
           <label htmlFor="search-query" className="block text-sm font-medium text-gray-700 mb-1">
             検索
           </label>
@@ -58,7 +58,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
             placeholder="英単語または日本語訳で検索"
             value={searchParams.query || ''}
             onChange={(e) => handleQueryChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-3 xl:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base xl:text-sm"
           />
         </div>
 
@@ -71,7 +71,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
             id="mastery-level"
             value={searchParams.mastery_level?.toString() || ''}
             onChange={(e) => handleMasteryLevelChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-3 xl:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base xl:text-sm"
           >
             <option value="">すべて</option>
             <option value="0">未学習</option>
@@ -89,7 +89,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
             id="difficulty-level"
             value={searchParams.difficulty_level?.toString() || ''}
             onChange={(e) => handleDifficultyLevelChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-3 xl:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base xl:text-sm"
           >
             <option value="">すべて</option>
             <option value="1">初級</option>
@@ -108,7 +108,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
               id="sort-by"
               value={searchParams.sort_by || 'created_at'}
               onChange={(e) => handleSortChange(e.target.value, searchParams.sort_order || 'desc')}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 px-3 py-3 xl:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base xl:text-sm"
             >
               <option value="created_at">追加日</option>
               <option value="english_word">英単語</option>
@@ -117,7 +117,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
             <select
               value={searchParams.sort_order || 'desc'}
               onChange={(e) => handleSortChange(searchParams.sort_by || 'created_at', e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-3 xl:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base xl:text-sm"
             >
               <option value="desc">降順</option>
               <option value="asc">昇順</option>
