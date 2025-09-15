@@ -43,35 +43,66 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!supabase) {
-      // Supabase未設定の場合は即座にローディング解除し、非ログイン扱い
+    let cancelled = false
+    const AUTH_INIT_TIMEOUT_MS = 5000
+
+    const finish = (nextUser: User | null) => {
+      if (cancelled) return
+      setUser(nextUser)
       setLoading(false)
+    }
+
+    // Supabase が未設定ならすぐ終了
+    if (!supabase) {
+      finish(null)
       return
     }
-    // 初期セッション取得
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ? {
+
+    const init = async () => {
+      try {
+        // getSession がハングするケースへのタイムアウト対策
+        const timeoutPromise = new Promise<null>((resolve) => {
+          setTimeout(() => resolve(null), AUTH_INIT_TIMEOUT_MS)
+        })
+
+        // supabase はこの時点では null ではないはずだが型ガード
+        const sessionPromise = (supabase as typeof supabase)!.auth.getSession().then(({ data: { session } }) => session)
+        const session = await Promise.race([sessionPromise, timeoutPromise])
+
+        if (session && 'user' in session && session?.user) {
+          finish({
+            id: session.user.id,
+            email: session.user.email!,
+            created_at: session.user.created_at
+          })
+        } else {
+          // タイムアウトもしくは未ログイン
+          finish(null)
+        }
+      } catch (e) {
+        // 失敗しても無限ローディングは避ける
+        // eslint-disable-next-line no-console
+        console.error('[Auth] 初期セッション取得に失敗しました', e)
+        finish(null)
+      }
+    }
+
+    void init()
+
+    // 認証状態変更監視 (init 後も最新化)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return
+      finish(session?.user ? {
         id: session.user.id,
         email: session.user.email!,
         created_at: session.user.created_at
       } : null)
-      setLoading(false)
     })
 
-    // 認証状態変更監視
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        void _event
-        setUser(session?.user ? {
-          id: session.user.id,
-          email: session.user.email!,
-          created_at: session.user.created_at
-        } : null)
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [])
 
   const clearError = () => setError(null)
