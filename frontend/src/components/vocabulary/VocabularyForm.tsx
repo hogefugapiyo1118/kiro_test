@@ -94,10 +94,7 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
 
     setErrors(newErrors)
     // Return true only if there are no required field errors and all japanese_meanings are valid
-    const hasEnglishWordError = !!newErrors.english_word;
-    const hasGeneralError = !!newErrors.general;
-    const hasJapaneseMeaningsError = newErrors.japanese_meanings?.some(error => !!error);
-    return !hasEnglishWordError && !hasGeneralError && !hasJapaneseMeaningsError;
+    return !newErrors.english_word && !newErrors.general && !(newErrors.japanese_meanings?.some(error => !!error));
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
