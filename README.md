@@ -138,8 +138,8 @@ cd backend && npm install
 cd ../frontend && npm install
 ```
 
-### 6. スキーマ適用 (初期)
-最初は `database/schema.sql` を Studio (http://localhost:54323) の SQL Editor で実行。
+### 6. スキーマ、関数適用 (初期)
+最初は `database/schema.sql`, `database/functions.sql` を Studio (http://localhost:54323) の SQL Editor で実行。
 差分管理導入時:
 ```bash
 npx supabase db diff -f init

@@ -1,15 +1,21 @@
 import express from 'express';
-import { describe, it, expect } from '@jest/globals';
-// Jest provides describe/it/expect globally; no need to import from 'node:test'
+import request from 'supertest';
+import vocabularyRoutes from '../routes/vocabulary';
+import { errorHandler } from '../middleware/errorHandler';
 
-// Simple test to verify the basic structure works
 describe('Vocabulary API Basic Test', () => {
-  it('should pass basic test', () => {
+  const app = express();
+  app.use(express.json());
+  app.use('/api/vocabulary', vocabularyRoutes);
+  app.use(errorHandler);
+
+  it('sanity math', () => {
     expect(1 + 1).toBe(2);
   });
 
-  it('should create express app', () => {
-    const app = express();
-    expect(app).toBeDefined();
+  it('GET /api/vocabulary without auth should return 401', async () => {
+    const res = await request(app).get('/api/vocabulary');
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBeDefined();
   });
 });
