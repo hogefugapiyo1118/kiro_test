@@ -40,4 +40,4 @@ services:
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
       - key: VITE_API_URL
-        value: https://dummy-frontend.example.com/api
+        value: https://dummy-vocabulary-api.example.com/api
