@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect, FC } from 'react'
 import { useStudy } from '../../hooks/useStudy'
 import FlashCard from './FlashCard'
 import StudyResults from './StudyResults'
@@ -8,7 +8,7 @@ interface StudySessionProps {
   sessionLimit?: number
 }
 
-const StudySession: React.FC<StudySessionProps> = ({ sessionLimit = 10 }) => {
+const StudySession: FC<StudySessionProps> = ({ sessionLimit = 10 }) => {
   const {
     loading,
     error,
@@ -179,7 +179,7 @@ const StudySession: React.FC<StudySessionProps> = ({ sessionLimit = 10 }) => {
       {/* Controls Help */}
       <div className="mt-8 bg-gray-50 rounded-lg p-4">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">操作方法</h3>
-        
+
         {/* Desktop Controls */}
         <div className="hidden md:block mb-3">
           <h4 className="text-xs font-medium text-gray-600 mb-1">キーボード</h4>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, FC } from 'react'
 
 export interface ToastMessage {
   id: string
@@ -12,7 +12,7 @@ interface ToastProps {
   onClose: (id: string) => void
 }
 
-const Toast: React.FC<ToastProps> = ({ message, onClose }) => {
+const Toast: FC<ToastProps> = ({ message, onClose }) => {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const Toast: React.FC<ToastProps> = ({ message, onClose }) => {
 
   const getToastStyles = () => {
     const baseStyles = 'flex items-center p-4 mb-4 text-sm rounded-lg shadow-lg'
-    
+
     switch (message.type) {
       case 'success':
         return `${baseStyles} text-green-800 bg-green-50 border border-green-200`

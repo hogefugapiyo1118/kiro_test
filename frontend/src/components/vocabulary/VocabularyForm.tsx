@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, FC, FormEvent } from 'react'
 import type { VocabularyWithMeanings, CreateVocabularyRequest, UpdateVocabularyRequest } from '../../types'
 
 interface VocabularyFormProps {
@@ -28,7 +28,7 @@ interface FormErrors {
   general?: string
 }
 
-const VocabularyForm: React.FC<VocabularyFormProps> = ({
+const VocabularyForm: FC<VocabularyFormProps> = ({
   vocabulary,
   onSubmit,
   onCancel,
@@ -56,10 +56,10 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
         mastery_level: vocabulary.mastery_level,
         japanese_meanings: vocabulary.japanese_meanings.length > 0
           ? vocabulary.japanese_meanings.map(meaning => ({
-              meaning: meaning.meaning,
-              part_of_speech: meaning.part_of_speech || '',
-              usage_note: meaning.usage_note || ''
-            }))
+            meaning: meaning.meaning,
+            part_of_speech: meaning.part_of_speech || '',
+            usage_note: meaning.usage_note || ''
+          }))
           : [{ meaning: '', part_of_speech: '', usage_note: '' }]
       })
     }
@@ -97,7 +97,7 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
     return !newErrors.english_word && !newErrors.general && !(newErrors.japanese_meanings?.some(error => !!error));
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
     if (!validateForm()) {
@@ -201,9 +201,8 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
             type="text"
             value={formData.english_word}
             onChange={(e) => handleInputChange('english_word', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errors.english_word ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.english_word ? 'border-red-300' : 'border-gray-300'
+              }`}
             placeholder="例: apple"
             disabled={loading}
           />
@@ -262,9 +261,8 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
                       type="text"
                       value={meaning.meaning}
                       onChange={(e) => handleMeaningChange(index, 'meaning', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.japanese_meanings?.[index] ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.japanese_meanings?.[index] ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="例: りんご"
                       disabled={loading}
                     />

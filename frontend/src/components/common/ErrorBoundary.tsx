@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { Component, ErrorInfo, ReactNode } from 'react'
 
 interface Props {
   children: ReactNode
@@ -68,11 +68,11 @@ class ErrorBoundary extends Component<Props, State> {
                 />
               </svg>
             </div>
-            
+
             <h2 className="text-xl font-semibold text-gray-900 text-center mb-2">
               予期しないエラーが発生しました
             </h2>
-            
+
             <p className="text-gray-600 text-center mb-6">
               申し訳ございません。アプリケーションでエラーが発生しました。
               ページを再読み込みするか、しばらく時間をおいてから再度お試しください。

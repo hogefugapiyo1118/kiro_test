@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import type { VocabularySearchParams } from '../../types'
 
 interface SearchFilterProps {
@@ -7,7 +7,7 @@ interface SearchFilterProps {
   onReset: () => void
 }
 
-const SearchFilter: React.FC<SearchFilterProps> = ({
+const SearchFilter: FC<SearchFilterProps> = ({
   searchParams,
   onSearchChange,
   onReset

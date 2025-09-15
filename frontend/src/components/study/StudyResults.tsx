@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import { StudySession } from '../../types'
 
 interface StudyResultsProps {
@@ -7,7 +7,7 @@ interface StudyResultsProps {
   onBackToMenu: () => void
 }
 
-const StudyResults: React.FC<StudyResultsProps> = ({
+const StudyResults: FC<StudyResultsProps> = ({
   results,
   onStartNewSession,
   onBackToMenu
@@ -16,7 +16,7 @@ const StudyResults: React.FC<StudyResultsProps> = ({
   const totalWords = results.length
   const correctAnswers = results.filter(result => result.is_correct).length
   const accuracy = totalWords > 0 ? (correctAnswers / totalWords) * 100 : 0
-  
+
   // Calculate average response time
   const responseTimes = results
     .filter(result => result.response_time !== undefined && result.response_time !== null)
@@ -78,14 +78,14 @@ const StudyResults: React.FC<StudyResultsProps> = ({
             </div>
             <div className="text-sm text-blue-800">学習した単語数</div>
           </div>
-          
+
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600 mb-1">
               {correctAnswers}
             </div>
             <div className="text-sm text-green-800">正解数</div>
           </div>
-          
+
           {averageResponseTime > 0 && (
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <div className="text-2xl font-bold text-purple-600 mb-1">
@@ -144,14 +144,12 @@ const StudyResults: React.FC<StudyResultsProps> = ({
             {results.map((result, index) => (
               <div
                 key={result.id}
-                className={`flex items-center justify-between p-3 rounded-lg ${
-                  result.is_correct ? 'bg-green-50' : 'bg-red-50'
-                }`}
+                className={`flex items-center justify-between p-3 rounded-lg ${result.is_correct ? 'bg-green-50' : 'bg-red-50'
+                  }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${
-                    result.is_correct ? 'bg-green-500' : 'bg-red-500'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${result.is_correct ? 'bg-green-500' : 'bg-red-500'
+                    }`}>
                     {result.is_correct ? '○' : '×'}
                   </div>
                   <span className="text-gray-800">問題 {index + 1}</span>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, ReactNode, FC } from 'react'
 import Toast, { ToastMessage } from '../components/common/Toast'
 
 interface ToastContextType {
@@ -24,7 +24,7 @@ interface ToastProviderProps {
   children: ReactNode
 }
 
-export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
+export const ToastProvider: FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
   const generateId = () => Math.random().toString(36).substr(2, 9)
@@ -77,7 +77,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      
+
       {/* Toast Container */}
       <div className="fixed top-4 right-4 z-50 w-full max-w-sm">
         {toasts.map(toast => (
