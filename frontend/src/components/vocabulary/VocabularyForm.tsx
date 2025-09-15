@@ -179,7 +179,6 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
   }
 
 
-
   return (
     <div className="bg-white rounded-lg shadow-md">
       <div className="px-6 py-4 border-b border-gray-200">
