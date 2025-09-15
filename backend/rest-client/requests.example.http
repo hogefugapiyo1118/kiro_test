@@ -7,8 +7,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "sample1@example.net",
-  "password": "sample1"
+  "email": "user@example.com",
+  "password": "your-password"
 }
 
 ### 2. Vocabulary list (uses extracted token)
