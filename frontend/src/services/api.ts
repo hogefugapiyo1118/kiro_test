@@ -84,4 +84,19 @@ export const studyApi = {
   }
 }
 
+// Dashboard API functions
+export const dashboardApi = {
+  // Get dashboard statistics
+  getStats: async () => {
+    const response = await api.get('/dashboard/stats')
+    return response.data
+  },
+
+  // Get weekly progress data
+  getProgress: async () => {
+    const response = await api.get('/dashboard/progress')
+    return response.data
+  }
+}
+
 export default api
