@@ -43,21 +43,60 @@ export class VocabularyRepository {
   }
 
   async create(vocabulary: Omit<Vocabulary, 'id' | 'created_at' | 'updated_at'>, meanings: Omit<JapaneseMeaning, 'id' | 'vocabulary_id' | 'created_at'>[]): Promise<VocabularyWithMeanings> {
-    // Use a transaction via a Postgres function to ensure atomicity
+    // Try RPC (atomic) first
     const { data, error } = await this.supabase.rpc('insert_vocabulary_with_meanings', {
       vocabulary_input: vocabulary,
       meanings_input: meanings
     });
 
-    if (error) {
-      throw new Error(`Failed to create vocabulary and meanings: ${error.message}`);
+    if (!error && data && data.length > 0) {
+      return data[0] as VocabularyWithMeanings;
     }
 
-    // The function should return the vocabulary and its meanings
-    if (!data || data.length === 0) {
-      throw new Error('No vocabulary returned from insert_vocabulary_with_meanings');
+    // Fallback if RPC not found or failed (graceful degradation)
+    if (error) {
+      console.warn('[VocabularyRepository.create] RPC fallback due to:', error.message);
     }
-    return data[0] as VocabularyWithMeanings;
+
+    // Insert vocabulary
+    const { data: vocabRow, error: vocabErr } = await this.supabase
+      .from('vocabulary')
+      .insert({
+        user_id: vocabulary.user_id,
+        english_word: vocabulary.english_word,
+        example_sentence: vocabulary.example_sentence,
+        difficulty_level: vocabulary.difficulty_level,
+        mastery_level: vocabulary.mastery_level
+      })
+      .select()
+      .single();
+
+    if (vocabErr || !vocabRow) {
+      throw new Error(`Failed to create vocabulary: ${vocabErr?.message}`);
+    }
+
+    let meaningsData: any[] = [];
+    if (meanings.length > 0) {
+      const insertMeanings = meanings.map(m => ({
+        vocabulary_id: vocabRow.id,
+        meaning: m.meaning,
+        part_of_speech: (m as any).part_of_speech,
+        usage_note: (m as any).usage_note
+      }));
+      const { data: jmRows, error: jmErr } = await this.supabase
+        .from('japanese_meanings')
+        .insert(insertMeanings)
+        .select();
+      if (jmErr) {
+        throw new Error(`Failed to create meanings: ${jmErr.message}`);
+      }
+      meaningsData = jmRows || [];
+    }
+
+    return {
+      ...vocabRow,
+      japanese_meanings: meaningsData
+    } as VocabularyWithMeanings;
   }
 
   async update(id: string, userId: string, vocabulary: Partial<Omit<Vocabulary, 'id' | 'user_id' | 'created_at' | 'updated_at'>>, meanings?: Omit<JapaneseMeaning, 'id' | 'vocabulary_id' | 'created_at'>[]): Promise<VocabularyWithMeanings> {

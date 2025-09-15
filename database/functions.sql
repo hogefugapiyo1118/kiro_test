@@ -2,8 +2,8 @@
 -- 入力は JSON（vocabulary_input は単語本体、meanings_input は訳語の配列）
 -- 戻り値は作成された単語1件＋その訳語配列（JSON）
 CREATE OR REPLACE FUNCTION insert_vocabulary_with_meanings(
-    vocabulary_input JSONB,
-    meanings_input JSONB
+    meanings_input JSONB,
+    vocabulary_input JSONB
 )
 RETURNS TABLE (
     id UUID,

@@ -46,8 +46,14 @@ export const useVocabulary = (): UseVocabularyReturn => {
 
       const response = await api.get(`/vocabulary?${queryParams.toString()}`)
       
-      setVocabularies(response.data.vocabularies || [])
-      setTotalCount(response.data.totalCount || 0)
+  // --- Backend とのレスポンス形式差異を吸収 ---
+  // Backend: { data: Vocabulary[], pagination: { total, ... } }
+  // (旧フロント想定): { vocabularies: Vocabulary[], totalCount }
+  const payload = response.data || {}
+  const list = payload.data || payload.vocabularies || []
+  const total = (payload.pagination && payload.pagination.total) || payload.totalCount || list.length || 0
+  setVocabularies(list)
+  setTotalCount(total)
     } catch (err: any) {
       console.error('Failed to fetch vocabularies:', err)
       setError(err.response?.data?.error || 'Failed to fetch vocabularies')
@@ -62,39 +68,45 @@ export const useVocabulary = (): UseVocabularyReturn => {
     try {
       setError(null)
       const response = await api.post('/vocabulary', data)
-      return response.data
+      const created = response.data.data || response.data
+      // 追加後に再取得（単純に最初のページを再取得: offset=0）
+      await fetchVocabularies({ limit: 50, offset: 0, sort_by: 'created_at', sort_order: 'desc' })
+      return created
     } catch (err: any) {
       console.error('Failed to create vocabulary:', err)
-      const errorMessage = err.response?.data?.error || 'Failed to create vocabulary'
+      const errorMessage = err.response?.data?.error || err.response?.data?.details || 'Failed to create vocabulary'
       setError(errorMessage)
       throw new Error(errorMessage)
     }
-  }, [])
+  }, [fetchVocabularies])
 
   const updateVocabulary = useCallback(async (id: string, data: UpdateVocabularyRequest): Promise<VocabularyWithMeanings> => {
     try {
       setError(null)
       const response = await api.put(`/vocabulary/${id}`, data)
-      return response.data
+      const updated = response.data.data || response.data
+      await fetchVocabularies()
+      return updated
     } catch (err: any) {
       console.error('Failed to update vocabulary:', err)
-      const errorMessage = err.response?.data?.error || 'Failed to update vocabulary'
+      const errorMessage = err.response?.data?.error || err.response?.data?.details || 'Failed to update vocabulary'
       setError(errorMessage)
       throw new Error(errorMessage)
     }
-  }, [])
+  }, [fetchVocabularies])
 
   const deleteVocabulary = useCallback(async (id: string): Promise<void> => {
     try {
       setError(null)
       await api.delete(`/vocabulary/${id}`)
+      await fetchVocabularies()
     } catch (err: any) {
       console.error('Failed to delete vocabulary:', err)
-      const errorMessage = err.response?.data?.error || 'Failed to delete vocabulary'
+      const errorMessage = err.response?.data?.error || err.response?.data?.details || 'Failed to delete vocabulary'
       setError(errorMessage)
       throw new Error(errorMessage)
     }
-  }, [])
+  }, [fetchVocabularies])
 
   return {
     vocabularies,
