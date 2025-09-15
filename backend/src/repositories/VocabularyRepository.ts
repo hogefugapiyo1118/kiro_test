@@ -45,8 +45,8 @@ export class VocabularyRepository {
   async create(vocabulary: Omit<Vocabulary, 'id' | 'created_at' | 'updated_at'>, meanings: Omit<JapaneseMeaning, 'id' | 'vocabulary_id' | 'created_at'>[]): Promise<VocabularyWithMeanings> {
     // Try RPC (atomic) first
     const { data, error } = await this.supabase.rpc('insert_vocabulary_with_meanings', {
-      vocabulary_input: vocabulary,
-      meanings_input: meanings
+      meanings_input: meanings,
+      vocabulary_input: vocabulary
     });
 
     if (!error && data && data.length > 0) {
