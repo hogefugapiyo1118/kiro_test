@@ -1,61 +1,23 @@
 import express from 'express';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
+import { validateBody, validateQuery, validateParams } from '../middleware/validation';
+import { vocabularySchemas, commonSchemas } from '../validators/joiSchemas';
 import { VocabularyService } from '../services/VocabularyService';
 import { supabase } from '../config/database';
 import { CreateVocabularyRequest, UpdateVocabularyRequest, VocabularySearchParams } from '../types/index';
-import Joi from 'joi';
 
 const router = express.Router();
 const vocabularyService = new VocabularyService(supabase);
 
-// Validation schemas
-const createVocabularySchema = Joi.object({
-  english_word: Joi.string().trim().min(1).max(255).required(),
-  example_sentence: Joi.string().trim().max(1000).optional().allow(''),
-  difficulty_level: Joi.number().integer().min(1).max(5).default(1),
-  japanese_meanings: Joi.array().items(
-    Joi.object({
-      meaning: Joi.string().trim().min(1).max(500).required(),
-      part_of_speech: Joi.string().trim().max(50).optional().allow(''),
-      usage_note: Joi.string().trim().max(500).optional().allow('')
-    })
-  ).min(1).required()
-});
 
-const updateVocabularySchema = Joi.object({
-  english_word: Joi.string().trim().min(1).max(255).optional(),
-  example_sentence: Joi.string().trim().max(1000).optional().allow(''),
-  difficulty_level: Joi.number().integer().min(1).max(5).optional(),
-  mastery_level: Joi.number().integer().min(0).max(2).optional(),
-  japanese_meanings: Joi.array().items(
-    Joi.object({
-      meaning: Joi.string().trim().min(1).max(500).required(),
-      part_of_speech: Joi.string().trim().max(50).optional().allow(''),
-      usage_note: Joi.string().trim().max(500).optional().allow('')
-    })
-  ).min(1).optional()
-});
-
-const searchParamsSchema = Joi.object({
-  query: Joi.string().trim().max(255).optional().allow(''),
-  mastery_level: Joi.number().integer().min(0).max(2).optional(),
-  difficulty_level: Joi.number().integer().min(1).max(5).optional(),
-  limit: Joi.number().integer().min(1).max(100).default(50),
-  offset: Joi.number().integer().min(0).default(0),
-  sort_by: Joi.string().valid('created_at', 'english_word', 'mastery_level', 'difficulty_level').default('created_at'),
-  sort_order: Joi.string().valid('asc', 'desc').default('desc')
-});
 
 // GET /api/vocabulary - Get all vocabulary with search and filtering
-router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
+router.get('/', 
+  authenticateToken, 
+  validateQuery(vocabularySchemas.query),
+  async (req: AuthenticatedRequest, res: express.Response) => {
   try {
-    const { error: validationError, value: params } = searchParamsSchema.validate(req.query);
-    if (validationError) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: validationError.details[0].message
-      });
-    }
+    const params = req.query as any;
 
     const searchParams: VocabularySearchParams = {
       query: params.query,
@@ -129,13 +91,12 @@ router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: expres
 });
 
 // GET /api/vocabulary/:id - Get specific vocabulary
-router.get('/:id', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
+router.get('/:id', 
+  authenticateToken, 
+  validateParams(commonSchemas.uuidParam),
+  async (req: AuthenticatedRequest, res: express.Response) => {
   try {
     const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ error: 'Vocabulary ID is required' });
-    }
 
     const vocabulary = await vocabularyService.getVocabulary(id, req.user!.id);
 
@@ -152,15 +113,12 @@ router.get('/:id', authenticateToken, async (req: AuthenticatedRequest, res: exp
 });
 
 // POST /api/vocabulary - Create new vocabulary
-router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
+router.post('/', 
+  authenticateToken, 
+  validateBody(vocabularySchemas.create),
+  async (req: AuthenticatedRequest, res: express.Response) => {
   try {
-    const { error: validationError, value: validatedData } = createVocabularySchema.validate(req.body);
-    if (validationError) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: validationError.details[0].message
-      });
-    }
+    const validatedData = req.body;
 
     const createRequest: CreateVocabularyRequest = {
       english_word: validatedData.english_word,
@@ -188,21 +146,14 @@ router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: expre
 });
 
 // PUT /api/vocabulary/:id - Update vocabulary
-router.put('/:id', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
+router.put('/:id', 
+  authenticateToken, 
+  validateParams(commonSchemas.uuidParam),
+  validateBody(vocabularySchemas.update),
+  async (req: AuthenticatedRequest, res: express.Response) => {
   try {
     const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ error: 'Vocabulary ID is required' });
-    }
-
-    const { error: validationError, value: validatedData } = updateVocabularySchema.validate(req.body);
-    if (validationError) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: validationError.details[0].message
-      });
-    }
+    const validatedData = req.body;
 
     // Check if vocabulary exists
     const existingVocabulary = await vocabularyService.getVocabulary(id, req.user!.id);
@@ -237,13 +188,12 @@ router.put('/:id', authenticateToken, async (req: AuthenticatedRequest, res: exp
 });
 
 // DELETE /api/vocabulary/:id - Delete vocabulary
-router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: express.Response) => {
+router.delete('/:id', 
+  authenticateToken, 
+  validateParams(commonSchemas.uuidParam),
+  async (req: AuthenticatedRequest, res: express.Response) => {
   try {
     const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ error: 'Vocabulary ID is required' });
-    }
 
     // Check if vocabulary exists
     const existingVocabulary = await vocabularyService.getVocabulary(id, req.user!.id);

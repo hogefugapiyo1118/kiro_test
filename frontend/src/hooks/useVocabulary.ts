@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import api from '../services/api'
+import { useErrorHandler } from './useErrorHandler'
 import type { 
   VocabularyWithMeanings, 
   VocabularySearchParams,
@@ -24,6 +25,7 @@ export const useVocabulary = (): UseVocabularyReturn => {
   const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { handleError } = useErrorHandler()
 
   const clearError = useCallback(() => {
     setError(null)
@@ -55,8 +57,8 @@ export const useVocabulary = (): UseVocabularyReturn => {
   setVocabularies(list)
   setTotalCount(total)
     } catch (err: any) {
-      console.error('Failed to fetch vocabularies:', err)
-      setError(err.response?.data?.error || 'Failed to fetch vocabularies')
+      const apiError = handleError(err, { showToast: false })
+      setError(apiError.message)
       setVocabularies([])
       setTotalCount(0)
     } finally {
@@ -73,10 +75,9 @@ export const useVocabulary = (): UseVocabularyReturn => {
       await fetchVocabularies({ limit: 50, offset: 0, sort_by: 'created_at', sort_order: 'desc' })
       return created
     } catch (err: any) {
-      console.error('Failed to create vocabulary:', err)
-      const errorMessage = err.response?.data?.error || err.response?.data?.details || 'Failed to create vocabulary'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      const apiError = handleError(err)
+      setError(apiError.message)
+      throw new Error(apiError.message)
     }
   }, [fetchVocabularies])
 
@@ -88,10 +89,9 @@ export const useVocabulary = (): UseVocabularyReturn => {
       await fetchVocabularies()
       return updated
     } catch (err: any) {
-      console.error('Failed to update vocabulary:', err)
-      const errorMessage = err.response?.data?.error || err.response?.data?.details || 'Failed to update vocabulary'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      const apiError = handleError(err)
+      setError(apiError.message)
+      throw new Error(apiError.message)
     }
   }, [fetchVocabularies])
 
@@ -101,10 +101,9 @@ export const useVocabulary = (): UseVocabularyReturn => {
       await api.delete(`/vocabulary/${id}`)
       await fetchVocabularies()
     } catch (err: any) {
-      console.error('Failed to delete vocabulary:', err)
-      const errorMessage = err.response?.data?.error || err.response?.data?.details || 'Failed to delete vocabulary'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+      const apiError = handleError(err)
+      setError(apiError.message)
+      throw new Error(apiError.message)
     }
   }, [fetchVocabularies])
 

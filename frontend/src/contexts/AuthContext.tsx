@@ -41,6 +41,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // 同時ログイン要求多重送信防止用フラグ
+  const [authInFlight, setAuthInFlight] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -109,8 +111,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signIn = async (email: string, password: string): Promise<AuthApiResponse> => {
     try {
+      if (authInFlight) {
+        return { message: 'Auth request already in progress' }
+      }
       setError(null)
       setLoading(true)
+      setAuthInFlight(true)
       if (!supabase) throw new Error('Supabase is not configured')
       const response = await api.post('/auth/login', {
         email,
@@ -139,13 +145,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error(errorMessage)
     } finally {
       setLoading(false)
+      setAuthInFlight(false)
     }
   }
 
   const signUp = async (email: string, password: string, confirmPassword: string): Promise<AuthApiResponse> => {
     try {
+      if (authInFlight) {
+        return { message: 'Auth request already in progress' }
+      }
       setError(null)
       setLoading(true)
+      setAuthInFlight(true)
       if (!supabase) throw new Error('Supabase is not configured')
       const response = await api.post('/auth/register', {
         email,
@@ -177,6 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error(errorMessage)
     } finally {
       setLoading(false)
+      setAuthInFlight(false)
     }
   }
 

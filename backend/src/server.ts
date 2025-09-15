@@ -48,17 +48,76 @@ app.use(cors(corsOptions));
 // Explicitly handle preflight quickly
 app.options('*', cors(corsOptions));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
-app.use('/api/', limiter);
+// Rate limiting configuration
+const createRateLimiter = (windowMs: number, max: number, message: string) => {
+  return rateLimit({
+    windowMs,
+    max,
+    message: {
+      error: message,
+      status: 'error',
+      code: 'RATE_LIMIT_EXCEEDED',
+      timestamp: new Date().toISOString()
+    },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    handler: (req, res) => {
+      res.status(429).json({
+        error: message,
+        status: 'error',
+        code: 'RATE_LIMIT_EXCEEDED',
+        timestamp: new Date().toISOString(),
+        path: req.path,
+        method: req.method
+      });
+    }
+  });
+};
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// General API rate limiting
+const generalLimiter = createRateLimiter(
+  15 * 60 * 1000, // 15 minutes
+  100, // 100 requests per window
+  'リクエストが多すぎます。15分後に再度お試しください'
+);
+
+// Strict rate limiting for authentication endpoints
+const authLimiter = createRateLimiter(
+  5 * 60 * 1000, // 5 minutes
+  5, // 5 attempts per window
+  'ログイン試行回数が多すぎます。5分後に再度お試しください'
+);
+
+// Apply rate limiting
+app.use('/api/', generalLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
+// Body parsing middleware with security limits
+app.use(express.json({ 
+  limit: '1mb', // Reduced from 10mb for security
+  strict: true,
+  type: 'application/json'
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '1mb',
+  parameterLimit: 100 // Limit number of parameters
+}));
+
+// Additional security middleware
+app.use((req, res, next) => {
+  // Remove server information
+  res.removeHeader('X-Powered-By');
+  
+  // Add security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  next();
+});
 
 // Health check endpoint
 app.get('/health', (req: express.Request, res: express.Response) => {

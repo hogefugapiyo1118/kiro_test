@@ -22,18 +22,18 @@ api.interceptors.request.use(async (config) => {
   return config
 })
 
-// Handle auth errors
+// Handle auth errors and other API errors
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
 
-  if (error.response?.status === 401 && !originalRequest._retry && supabase) {
+    if (error.response?.status === 401 && !originalRequest._retry && supabase) {
       originalRequest._retry = true
 
       try {
         // Try to refresh the token
-  const { data: { session } } = await supabase.auth.refreshSession()
+        const { data: { session } } = await supabase.auth.refreshSession()
 
         if (session?.access_token) {
           // Update the authorization header and retry the request
@@ -46,6 +46,17 @@ api.interceptors.response.use(
 
       // If refresh fails, redirect to login
       window.location.href = '/login'
+    }
+
+    // Log errors in development
+    if (import.meta.env.DEV) {
+      console.error('API Error:', {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      })
     }
 
     return Promise.reject(error)
