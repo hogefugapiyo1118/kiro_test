@@ -7,20 +7,20 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
-  "password": "your-password"
+  "email": "sample1@example.net",
+  "password": "sample1"
 }
 
 ### 2. Vocabulary list (uses extracted token)
 GET {{baseUrl}}/vocabulary?limit=20&offset=0&sort_by=created_at&sort_order=desc
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.session.access_token}}
 Accept: application/json
 
 ### 3. Vocabulary create
 # @name createVocab
 POST {{baseUrl}}/vocabulary
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.session.access_token}}
 
 {
   "english_word": "example",
@@ -35,13 +35,13 @@ Authorization: Bearer {{login.response.body.$.token}}
 #  create のレスポンスを開き data.id をコピーして下記を更新
 @vocabId = REPLACE_WITH_ID
 GET {{baseUrl}}/vocabulary/{{vocabId}}
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.session.access_token}}
 Accept: application/json
 
 ### 5. Vocabulary update
 PUT {{baseUrl}}/vocabulary/{{vocabId}}
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.session.access_token}}
 
 {
   "example_sentence": "Updated sentence.",
@@ -53,16 +53,16 @@ Authorization: Bearer {{login.response.body.$.token}}
 
 ### 6. Vocabulary delete
 DELETE {{baseUrl}}/vocabulary/{{vocabId}}
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.session.access_token}}
 
 ### 7. Study session start
 GET {{baseUrl}}/study/session
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.session.access_token}}
 
 ### 8. Study result
 POST {{baseUrl}}/study/result
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.session.access_token}}
 
 {
   "vocabulary_id": "REPLACE_WITH_ID",
