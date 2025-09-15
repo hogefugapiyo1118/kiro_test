@@ -29,7 +29,7 @@ services:
     container_name: vocabulary-frontend
     environment:
       NODE_ENV: production
-      VITE_API_URL: http://localhost:3001
+      VITE_API_URL: http://localhost:3001/api
       VITE_SUPABASE_URL: ${SUPABASE_URL}
       VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
     ports:
