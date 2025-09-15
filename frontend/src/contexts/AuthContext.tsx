@@ -167,7 +167,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (err: any) {
       console.error('Token refresh failed:', err)
       // If refresh fails, sign out the user
-      await signOut().catch(() => { })
+      await signOut().catch((signOutErr) => {
+        console.error('Sign out failed after token refresh failure:', signOutErr);
+      })
     }
   }
 
