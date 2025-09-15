@@ -7,7 +7,7 @@ import {
   CreateVocabularyRequest, 
   UpdateVocabularyRequest,
   VocabularySearchParams 
-} from '../types/index.js';
+} from '../types/index';
 
 export class VocabularyService {
   private vocabularyRepo: VocabularyRepository;

@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { DailyStats } from '../types/index.js';
+import { DailyStats } from '../types/index';
 
 export class DailyStatsRepository {
   constructor(private supabase: SupabaseClient) {}

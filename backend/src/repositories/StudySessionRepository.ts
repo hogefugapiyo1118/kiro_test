@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { StudySession } from '../types/index.js';
+import { StudySession } from '../types/index';
 
 export class StudySessionRepository {
   constructor(private supabase: SupabaseClient) { }

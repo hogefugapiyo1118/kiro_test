@@ -52,4 +52,36 @@ api.interceptors.response.use(
   }
 )
 
+// Study API functions
+export const studyApi = {
+  // Start a study session
+  startSession: async (limit: number = 10) => {
+    const response = await api.get(`/study/session?limit=${limit}`)
+    return response.data
+  },
+
+  // Record study result
+  recordResult: async (vocabularyId: string, isCorrect: boolean, responseTime?: number) => {
+    const response = await api.post('/study/result', {
+      vocabulary_id: vocabularyId,
+      is_correct: isCorrect,
+      response_time: responseTime
+    })
+    return response.data
+  },
+
+  // Get study statistics
+  getStats: async (vocabularyId?: string) => {
+    const params = vocabularyId ? `?vocabulary_id=${vocabularyId}` : ''
+    const response = await api.get(`/study/stats${params}`)
+    return response.data
+  },
+
+  // Get study history
+  getHistory: async (limit: number = 50) => {
+    const response = await api.get(`/study/history?limit=${limit}`)
+    return response.data
+  }
+}
+
 export default api

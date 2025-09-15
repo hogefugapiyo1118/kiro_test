@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Vocabulary, JapaneseMeaning, VocabularyWithMeanings } from '../types/index.js';
+import { Vocabulary, JapaneseMeaning, VocabularyWithMeanings } from '../types/index';
 
 export class VocabularyRepository {
   constructor(private supabase: SupabaseClient) { }
