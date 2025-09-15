@@ -24,7 +24,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Get initial session
+    if (!supabase) {
+      // Supabase未設定の場合は即座にローディング解除し、非ログイン扱い
+      setLoading(false)
+      return
+    }
+    // 初期セッション取得
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ? {
         id: session.user.id,
@@ -34,10 +39,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false)
     })
 
-    // Listen for auth changes
+    // 認証状態変更監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        // mark unused param as used to satisfy TS noUnusedParameters
         void _event
         setUser(session?.user ? {
           id: session.user.id,
@@ -57,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null)
       setLoading(true)
-      
+      if (!supabase) throw new Error('Supabase is not configured')
       const response = await api.post('/auth/login', {
         email,
         password,
@@ -83,7 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null)
       setLoading(true)
-      
+      if (!supabase) throw new Error('Supabase is not configured')
       const response = await api.post('/auth/register', {
         email,
         password,
@@ -112,10 +116,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null)
       setLoading(true)
-      
+      if (!supabase) throw new Error('Supabase is not configured')
       // Call our backend logout endpoint
       await api.post('/auth/logout')
-      
+
       // Also sign out from Supabase client
       await supabase.auth.signOut()
     } catch (err: any) {
@@ -130,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const resetPassword = async (email: string) => {
     try {
       setError(null)
-      
+
       const response = await api.post('/auth/reset-password', {
         email,
       })
@@ -145,8 +149,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshToken = async () => {
     try {
+      if (!supabase) return
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (session?.refresh_token) {
         const response = await api.post('/auth/refresh', {
           refresh_token: session.refresh_token,
@@ -162,7 +167,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (err: any) {
       console.error('Token refresh failed:', err)
       // If refresh fails, sign out the user
-      await signOut()
+      await signOut().catch(() => { })
     }
   }
 
