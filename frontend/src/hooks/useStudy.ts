@@ -59,13 +59,12 @@ export const useStudy = () => {
       
       // Move to next question or end session
       if (currentIndex < sessionData.vocabulary.length - 1) {
+        // 次の問題へ
         setCurrentIndex(prev => prev + 1)
         setShowAnswer(false)
         setQuestionStartTime(Date.now())
       } else {
-        // Session completed
-        setSessionData(null)
-        setCurrentIndex(0)
+        setCurrentIndex(sessionData.vocabulary.length)
         setShowAnswer(false)
         setQuestionStartTime(null)
       }
@@ -121,8 +120,8 @@ export const useStudy = () => {
   // Get current vocabulary item
   const currentVocabulary = sessionData?.vocabulary[currentIndex] || null
 
-  // Check if session is completed
-  const isSessionCompleted = sessionData && currentIndex >= sessionData.vocabulary.length
+  // Check if session is completed (sessionData は保持したまま currentIndex が length に到達したら完了)
+  const isSessionCompleted = !!sessionData && currentIndex >= sessionData.vocabulary.length
 
   return {
     // State
