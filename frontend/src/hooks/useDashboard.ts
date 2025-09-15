@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { dashboardApi } from '../services/api'
+import { useErrorHandler } from './useErrorHandler'
 import type { DashboardStats } from '../types'
 
 interface WeeklyProgressData {
@@ -14,6 +15,7 @@ export const useDashboard = () => {
   const [weeklyProgress, setWeeklyProgress] = useState<WeeklyProgressData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { handleError } = useErrorHandler()
 
   const fetchDashboardData = async () => {
     try {
@@ -29,8 +31,8 @@ export const useDashboard = () => {
       setStats(statsResponse)
       setWeeklyProgress(progressResponse)
     } catch (err) {
-      console.error('Error fetching dashboard data:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data')
+      const apiError = handleError(err, { showToast: false })
+      setError(apiError.message)
     } finally {
       setLoading(false)
     }

@@ -1,6 +1,8 @@
+export { default as ErrorBoundary } from './ErrorBoundary'
 export { default as Header } from './Header'
 export { default as Layout } from './Layout'
 export { default as LoadingSpinner } from './LoadingSpinner'
 export { default as Modal } from './Modal'
 export { default as ProtectedRoute } from './ProtectedRoute'
 export { default as Sidebar } from './Sidebar'
+export { default as Toast } from './Toast'

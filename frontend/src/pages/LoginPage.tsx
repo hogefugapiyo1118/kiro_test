@@ -33,6 +33,8 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // すでに送信中なら無視（Enter 連打 / ダブルクリック防止）
+    if (localLoading || loading) return
     setLocalLoading(true)
     setLocalError('')
     setSuccessMessage('')
