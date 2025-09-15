@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import type { VocabularyWithMeanings } from '../../types'
 
 interface VocabularyCardProps {
@@ -7,7 +7,7 @@ interface VocabularyCardProps {
   onDelete: (id: string) => void
 }
 
-const VocabularyCard: React.FC<VocabularyCardProps> = ({
+const VocabularyCard: FC<VocabularyCardProps> = ({
   vocabulary,
   onEdit,
   onDelete

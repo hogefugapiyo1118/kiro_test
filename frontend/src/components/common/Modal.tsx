@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react'
+import { useEffect, FC, ReactNode } from 'react'
 
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
-  children: React.ReactNode
+  children: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 }
 
-const Modal: React.FC<ModalProps> = ({
+const Modal: FC<ModalProps> = ({
   isOpen,
   onClose,
   children,

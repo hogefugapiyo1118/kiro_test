@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC, Fragment } from 'react'
 
 interface PaginationProps {
   currentPage: number
@@ -8,7 +8,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void
 }
 
-const Pagination: React.FC<PaginationProps> = ({
+const Pagination: FC<PaginationProps> = ({
   currentPage,
   totalPages,
   totalItems,
@@ -108,7 +108,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
             {/* Page numbers */}
             {getPageNumbers().map((page, index) => (
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 {page === '...' ? (
                   <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
                     ...
@@ -116,16 +116,15 @@ const Pagination: React.FC<PaginationProps> = ({
                 ) : (
                   <button
                     onClick={() => onPageChange(page as number)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                      currentPage === page
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page
                         ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                         : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
 
             {/* Next button */}

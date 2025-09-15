@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import { useState, FC } from 'react'
 import { VocabularyList, VocabularyForm } from '../components/vocabulary'
 import Modal from '../components/common/Modal'
 import { useVocabulary } from '../hooks/useVocabulary'
 import type { VocabularyWithMeanings, CreateVocabularyRequest, UpdateVocabularyRequest } from '../types'
 
-const VocabularyPage: React.FC = () => {
+const VocabularyPage: FC = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingVocabulary, setEditingVocabulary] = useState<VocabularyWithMeanings | undefined>()
@@ -37,13 +37,13 @@ const VocabularyPage: React.FC = () => {
   const handleFormSubmit = async (data: CreateVocabularyRequest | UpdateVocabularyRequest) => {
     try {
       setFormLoading(true)
-      
+
       if (editingVocabulary) {
         await updateVocabulary(editingVocabulary.id, data as UpdateVocabularyRequest)
       } else {
         await createVocabulary(data as CreateVocabularyRequest)
       }
-      
+
       setIsModalOpen(false)
       setEditingVocabulary(undefined)
       setRefreshTrigger(prev => prev + 1)

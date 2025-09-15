@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, FC } from 'react'
 import type { VocabularyWithMeanings, VocabularySearchParams } from '../../types'
 import VocabularyCard from './VocabularyCard'
 import SearchFilter from './SearchFilter'
@@ -14,7 +14,7 @@ interface VocabularyListProps {
 
 const ITEMS_PER_PAGE = 12
 
-const VocabularyList: React.FC<VocabularyListProps> = ({
+const VocabularyList: FC<VocabularyListProps> = ({
   onEdit,
   onDelete,
   refreshTrigger
@@ -124,7 +124,7 @@ const VocabularyList: React.FC<VocabularyListProps> = ({
             </>
           )}
         </div>
-        
+
         {!loading && totalCount > 0 && (
           <div className="text-sm text-gray-500">
             ページ {currentPage} / {totalPages}

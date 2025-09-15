@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import { useState, useRef, FC, TouchEvent } from 'react'
 import { VocabularyWithMeanings } from '../../types'
 
 interface FlashCardProps {
@@ -9,7 +9,7 @@ interface FlashCardProps {
   loading?: boolean
 }
 
-const FlashCard: React.FC<FlashCardProps> = ({
+const FlashCard: FC<FlashCardProps> = ({
   vocabulary,
   showAnswer,
   onShowAnswer,
@@ -21,7 +21,7 @@ const FlashCard: React.FC<FlashCardProps> = ({
   const cardRef = useRef<HTMLDivElement>(null)
 
   // Handle touch events for swipe gestures
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (e: TouchEvent) => {
     setTouchEnd(null)
     setTouchStart({
       x: e.targetTouches[0].clientX,
@@ -29,7 +29,7 @@ const FlashCard: React.FC<FlashCardProps> = ({
     })
   }
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = (e: TouchEvent) => {
     setTouchEnd({
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY
@@ -59,7 +59,7 @@ const FlashCard: React.FC<FlashCardProps> = ({
   return (
     <div className="max-w-md mx-auto">
       {/* Card */}
-      <div 
+      <div
         ref={cardRef}
         className="bg-white rounded-xl shadow-lg p-8 min-h-[300px] flex flex-col justify-center items-center text-center touch-manipulation select-none"
         onTouchStart={handleTouchStart}
@@ -139,11 +139,10 @@ const FlashCard: React.FC<FlashCardProps> = ({
             {[1, 2, 3, 4, 5].map((level) => (
               <div
                 key={level}
-                className={`w-2 h-2 rounded-full ${
-                  level <= vocabulary.difficulty_level
+                className={`w-2 h-2 rounded-full ${level <= vocabulary.difficulty_level
                     ? 'bg-yellow-400'
                     : 'bg-gray-200'
-                }`}
+                  }`}
               />
             ))}
           </div>
