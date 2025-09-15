@@ -22,7 +22,6 @@ export const useStudy = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [sessionResults, setSessionResults] = useState<StudySession[]>([])
-  const [, setSessionStartTime] = useState<number | null>(null)
   const [questionStartTime, setQuestionStartTime] = useState<number | null>(null)
 
   const startSession = useCallback(async (limit: number = 10) => {
@@ -34,7 +33,6 @@ export const useStudy = () => {
       setCurrentIndex(0)
       setShowAnswer(false)
       setSessionResults([])
-      setSessionStartTime(Date.now())
       setQuestionStartTime(Date.now())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start study session')
@@ -107,7 +105,6 @@ export const useStudy = () => {
     setCurrentIndex(0)
     setShowAnswer(false)
     setSessionResults([])
-    setSessionStartTime(null)
     setQuestionStartTime(null)
     setError(null)
   }, [])
