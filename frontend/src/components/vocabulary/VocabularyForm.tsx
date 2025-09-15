@@ -93,7 +93,11 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({
     newErrors.japanese_meanings = meaningErrors
 
     setErrors(newErrors)
-    return Object.keys(newErrors).length === 0 || (Object.keys(newErrors).length === 1 && newErrors.japanese_meanings?.every(error => !error))
+    // Return true only if there are no required field errors and all japanese_meanings are valid
+    const hasEnglishWordError = !!newErrors.english_word;
+    const hasGeneralError = !!newErrors.general;
+    const hasJapaneseMeaningsError = newErrors.japanese_meanings?.some(error => !!error);
+    return !hasEnglishWordError && !hasGeneralError && !hasJapaneseMeaningsError;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
