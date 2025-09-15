@@ -39,14 +39,17 @@ const LoginPage: React.FC = () => {
 
     try {
       if (isLogin) {
-        await signIn(email, password)
-        navigate('/dashboard')
+        const result = await signIn(email, password)
+        // user state は AuthContext 内で即時更新され、上位 useEffect が /dashboard へ遷移
+        if (result?.user) {
+          navigate('/dashboard')
+        }
       } else {
         if (password !== confirmPassword) {
           throw new Error('パスワードが一致しません')
         }
         const result = await signUp(email, password, confirmPassword)
-        
+
         if (result.user && !result.session) {
           setSuccessMessage('登録完了！メールを確認してアカウントを有効化してください。')
         } else {
@@ -213,7 +216,7 @@ const LoginPage: React.FC = () => {
         >
           {isLogin ? 'アカウントを作成する' : 'ログインする'}
         </button>
-        
+
         {isLogin && (
           <button
             onClick={() => setShowResetPassword(true)}

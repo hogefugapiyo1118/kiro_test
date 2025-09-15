@@ -4,6 +4,25 @@ import { supabase } from '../lib/supabase'
 import { api } from '../services/api'
 import type { AuthContextType, User } from '../types'
 
+interface AuthApiUser {
+  id: string
+  email: string
+  emailConfirmed?: boolean
+  createdAt?: string
+}
+
+interface AuthApiSession {
+  access_token: string
+  refresh_token: string
+  expires_at?: number
+}
+
+interface AuthApiResponse {
+  message?: string
+  user?: AuthApiUser
+  session?: AuthApiSession
+}
+
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const useAuth = () => {
@@ -57,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const clearError = () => setError(null)
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthApiResponse> => {
     try {
       setError(null)
       setLoading(true)
@@ -74,6 +93,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           refresh_token: response.data.session.refresh_token,
         })
       }
+      // 即時に user state を更新して ProtectedRoute の再リダイレクトを防ぐ
+      if (response.data.user) {
+        setUser({
+          id: response.data.user.id,
+          email: response.data.user.email,
+          created_at: response.data.user.createdAt || new Date().toISOString()
+        })
+      }
+      return response.data as AuthApiResponse
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Login failed'
       setError(errorMessage)
@@ -83,7 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const signUp = async (email: string, password: string, confirmPassword: string) => {
+  const signUp = async (email: string, password: string, confirmPassword: string): Promise<AuthApiResponse> => {
     try {
       setError(null)
       setLoading(true)
@@ -102,7 +130,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       }
 
-      return response.data
+      // メール確認不要で session がすぐ得られた場合は user を即設定
+      if (response.data.user && (response.data.session || response.data.user.emailConfirmed)) {
+        setUser({
+          id: response.data.user.id,
+          email: response.data.user.email,
+          created_at: response.data.user.createdAt || new Date().toISOString()
+        })
+      }
+
+      return response.data as AuthApiResponse
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.response?.data?.error || 'Registration failed'
       setError(errorMessage)
